@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta http-equiv='pragma' content='no-cache'>
+  <title>Server Resources Monitor</title>
+  
+  <!-- Favicons Generated with favicon.il.ly -->
+  <link rel="icon" sizes="16x16 32x32 48x48 64x64" href="img/favicon.ico"/>
+  <!--[if IE]>
+  <link rel="shortcut icon" href="favicon.ico"/>
+  <![endif]-->
+  <!-- Optional: Android & iPhone-->
+  <link rel="apple-touch-icon-precomposed" href="img/favicon-152.png"/>
+  <!-- Optional: IE10 Tile.-->
+  <meta name="msapplication-TileColor" content="#FFFFFF"/>
+  <meta name="msapplication-TileImage" content="img/favicon-144.png"/>
+  <!-- Optional: ipads, androids, iphones, ...-->
+  <link rel="apple-touch-icon-precomposed" sizes="152x152" href="img/favicon-152.png"/>
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="img/favicon-144.png"/>
+  <link rel="apple-touch-icon-precomposed" sizes="120x120" href="img/favicon-120.png"/>
+  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/favicon-114.png"/>
+  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/favicon-72.png"/>
+  <link rel="apple-touch-icon-precomposed" href="img/favicon-57.png"/>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css">
+  <!-- Bootstrap core CSS -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Design Bootstrap -->
+  <link href="css/mdb.min.css" rel="stylesheet">
+  <!-- Your custom styles (optional) -->
+  <link href="css/style.css" rel="stylesheet">
+  <link href="css/timedropper.min.css" rel="stylesheet">
+  <script src="./node_modules/chart.js/dist/Chart.min.js"></script>
+</head>
+
+<body>
+
+  <div id="response"></div>
+
+  <section class="sticky-top">
+    <!--Navbar-->
+    <nav class="navbar navbar-expand-lg navbar-dark primary-color">
+
+      <!-- Navbar brand -->
+      <a class="navbar-brand" href="#">Server Resources Monitor</a>
+
+      <!-- Collapse button -->
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav"
+        aria-controls="basicExampleNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Collapsible content -->
+      <div class="collapse navbar-collapse" id="basicExampleNav">
+
+        <!-- Links -->
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home
+              <span class="sr-only">(current)</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="error_log.php">error_log</a>
+          </li>
+
+        </ul>
+        <!-- Links -->
+        <span class="navbar-text white-text">
+          <i class="fas fa-server"></i>
+          <select id="servers">
+            <option>WebAP01</option>
+            <option>WebAP02</option>
+            <option selected>WebAP03</option>
+            <option>WebAP04</option>
+          </select>
+        </span>
+
+      <!-- Collapsible content -->
+      </div>
+    </nav>
+    <!--/.Navbar-->
+  
+    <div class="container">
+      <div class="top_controls">
+        <div class="row">
+          <div class="col col-6 col-md-3">
+            <div class="mnt-slct">
+              <label for="month-selecter">Month:</label>
+              <select id="month-selecter" class="browser-default custom-select" name="month_selecter">
+                  <option selected value="02">2月</option>
+              </select>
+            </div>
+          </div>
+          <div class="col col-6 col-md-3">
+            <label for="day-selecter">Day:</label>
+            <select id="day-selecter" class="browser-default custom-select" name="day_selecter">
+                <option selected value="20">20日</option>
+                <option value="21">21日</option>
+                <option value="22">22日</option>
+            </select>
+          </div>
+
+          <div class="col col-6 col-md-3">
+              <div class="dts-box">
+                <label for="display-time-start" class="display-time-label">Display Time:</label>
+                <input type="time" id="display-time-start" class="display-time browser-default" />
+              </div>
+          </div>
+          <div class="col col-6 col-md-3">
+              <div class="dte-box">
+                <input type="time" id="display-time-end" class="display-time browser-default" />
+              </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <div class="time-range">
+              <label for="time-range">Time:</label>
+              <div class="timebar-sec">
+                <span class="range-scale-min font-weight-bold blue-text">0時</span>
+                <input type="range" id="time-range" class="custom-range" min="0" max="1439" step="1" value="0">
+                <span class="range-scale-max font-weight-bold blue-text">24時</span>
+                <span id="set-time">00:00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <hr>
+
+  </section>
+    
+      
+  <div class="container">
+    <div class="row">
+      <div class="col col-md-4">
+        <div class="graph-box">
+          <div>
+            <canvas id="chart1"></canvas>
+          </div>
+          <div class="dayset-box">
+            <span class="graph-dayset"></span><span id="chart1-set-time">00:00</span>
+          </div>
+        </div>
+      </div>
+      <div class="col col-md-8">
+        <div class="graph-box">
+          <canvas id="chart2"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="graph-box">
+          <canvas id="chart3"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="graph-box">
+          <span>プロセス（上位10件）</span>
+          <div class="dayset-box">
+            <span class="graph-dayset"></span><span id="process-set-time">00:00</span>
+          </div>
+          <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">PID</th>
+                    <th scope="col">USER</th>
+                    <th scope="col">PR</th>
+                    <th scope="col">NI</th>
+                    <th scope="col">VIRT</th>
+                    <th scope="col">RES</th>
+                    <th scope="col">SHR</th>
+                    <th scope="col">S</th>
+                    <th scope="col">%CPU</th>
+                    <th scope="col">%MEM</th>
+                    <th scope="col">TIME+</th>
+                    <th scope="col">COMMAND</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr id="pr1">
+                      <th scope="row"></th>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                  </tr>
+                  <tr id="pr2">
+                      <th scope="row"></th>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                  </tr>
+                  <tr id="pr3">
+                      <th scope="row"></th>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                  </tr>
+                  <tr id="pr4">
+                      <th scope="row"></th>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                  </tr>
+                  <tr id="pr5">
+                      <th scope="row"></th>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                  </tr>
+                  <tr id="pr6">
+                      <th scope="row"></th>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                  </tr>
+                  <tr id="pr7">
+                      <th scope="row"></th>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                  </tr>
+                  <tr id="pr8">
+                      <th scope="row"></th>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                  </tr>
+                  <tr id="pr9">
+                      <th scope="row"></th>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                  </tr>
+                  <tr id="pr10">
+                      <th scope="row"></th>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="graph-box">
+          <canvas id="chart5" ></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="graph-box">
+          <canvas id="chart6" ></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="graph-box">
+          <canvas id="chart7" ></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="rtbtn" class="btn">
+      <span class="rtstatus_btn">OFF</span>
+      <span class="ripple"></span>
+  </div>
+ 
+  <!-- JQuery -->
+  <script src="js/jquery-3.3.1.min.js"></script>
+  <!-- Bootstrap tooltips -->
+  <script src="js/popper.min.js"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script src="js/bootstrap.min.js"></script>
+  <!-- MDB core JavaScript -->
+  <script src="js/mdb.js"></script>
+  <!-- <script src="js/timedropper.min.js"></script> -->
+  <script src="js/main.js"></script>
+
+</body>
+
+</html>
